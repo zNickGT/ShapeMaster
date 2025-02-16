@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Shape</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+   
+    <h1>Perfect Shape Game</h1>
+    <p>Choose mode and begin drawing!</p>
+ 
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Shape Game</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        canvas { border: 2px solid black; cursor: crosshair; }
+        #score { font-size: 20px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <button onclick="setMode('circle')">Perfect Circle</button>
+    <button onclick="setMode('square')">Perfect Square</button>
+    <button onclick="setMode('triangle')">Perfect Triangle</button> <br/><br/>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <div id="score">Score: 0%</div>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let drawing = false;
+        let points = [];
+        let mode = "circle";
+
+        function setMode(selectedMode) {
+            mode = selectedMode;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById("score").innerText = "Score: 0%";
+        }
+
+        canvas.addEventListener("mousedown", () => {
+            drawing = true;
+            points = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            points.push({ x, y });
+            ctx.fillStyle = "black";
+            ctx.fillRect(x, y, 2, 2);
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+            if (points.length > 5) {
+                if (mode === "circle") {
+                    calculateCircleScore();
+                } else if (mode === "square") {
+                    calculateSquareScore();
+                } else {
+                    calculateTriangleScore();
+                }
+            }
+        });
+
+        function calculateCircleScore() {
+            let sumX = 0, sumY = 0;
+            points.forEach(p => { sumX += p.x; sumY += p.y; });
+            let centerX = sumX / points.length;
+            let centerY = sumY / points.length;
+            
+            let sumRadius = 0;
+            points.forEach(p => {
+                sumRadius += Math.hypot(p.x - centerX, p.y - centerY);
+            });
+            let avgRadius = sumRadius / points.length;
+            
+            let errorSum = 0;
+            points.forEach(p => {
+                let dist = Math.hypot(p.x - centerX, p.y - centerY);
+                errorSum += Math.abs(dist - avgRadius);
+            });
+            
+            let score = Math.max(0, 100 - (errorSum / points.length) * 5);
+            document.getElementById("score").innerText = `Score: ${score.toFixed(2)}%`;
+            
+            drawPerfectCircle(centerX, centerY, avgRadius);
+        }
+
+        function calculateSquareScore() {
+            let minX = Math.min(...points.map(p => p.x));
+            let maxX = Math.max(...points.map(p => p.x));
+            let minY = Math.min(...points.map(p => p.y));
+            let maxY = Math.max(...points.map(p => p.y));
+            
+            let width = maxX - minX;
+            let height = maxY - minY;
+            let error = Math.abs(width - height);
+            let score = Math.max(0, 100 - (error / Math.max(width, height)) * 100);
+            
+            document.getElementById("score").innerText = `Score: ${score.toFixed(2)}%`;
+            drawPerfectSquare(minX, minY, width, height);
+        }
+
+        function calculateTriangleScore() {
+            let minX = Math.min(...points.map(p => p.x));
+            let maxX = Math.max(...points.map(p => p.x));
+            let minY = Math.min(...points.map(p => p.y));
+            let maxY = Math.max(...points.map(p => p.y));
+            
+            let base = maxX - minX;
+            let height = maxY - minY;
+            let error = Math.abs(base - height * Math.sqrt(3) / 2);
+            let score = Math.max(0, 100 - (error / Math.max(base, height)) * 100);
+            
+            document.getElementById("score").innerText = `Score: ${score.toFixed(2)}%`;
+            drawPerfectTriangle(minX, minY, base, height);
+        }
+
+        function drawPerfectCircle(x, y, r) {
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawPerfectSquare(x, y, width, height) {
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.rect(x, y, width, height);
+            ctx.stroke();
+        }
+
+        function drawPerfectTriangle(x, y, base, height) {
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x + base / 2, y);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x + base, y + height);
+            ctx.closePath();
+            ctx.stroke();
+        }
+    </script>
+</body>
+</html>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
